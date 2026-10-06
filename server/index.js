@@ -1,4 +1,5 @@
 ﻿const express=require('express'),fs=require('fs'),path=require('path');
+require('dotenv').config({path:path.join(__dirname,'../.env')});
 const app=express();app.use(express.json({limit:'8mb'}));
 app.use(express.static(path.join(__dirname,'../client')));
 const DB=path.join(__dirname,'data.json');
