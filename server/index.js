@@ -44,3 +44,10 @@ d.sort((a,b)=>b.score-a.score);s.json(d.map(r=>({...r,likes:r.likes.length,repos
 app.post('/api/reports/:id/:act',(q,s)=>{const d=load(),r=d.find(x=>x.id===q.params.id),a=q.params.act,u=q.body.uid;if(!r||!u||!['likes','reposts'].includes(a))return s.status(400).json({error:'Invalid'});
 if(!r[a].includes(u))r[a].push(u);save(d);s.json({ok:true})});
 app.listen(process.env.PORT||3000,()=>console.log('Gram Sevak chalu: http://localhost:'+(process.env.PORT||3000)));
+
+async function gem(parts){
+  const k=process.env.OPENROUTER_API_KEY;if(!k)throw new Error('OPENROUTER_API_KEY missing');
+  const content=parts.map(p=>p.text?{type:'text',text:p.text+'\nReply with JSON only.'}:{type:'image_url',image_url:{url:'data:image/jpeg;base64,'+p.inline_data.data}});
+  const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+k},body:JSON.stringify({model:process.env.OPENROUTER_MODEL||'openrouter/free',messages:[{role:'user',content}]})});
+  const j=await r.json();if(!r.ok)throw new Error(j.error?.message||'OpenRouter error');
+  const m=j.choices[0].message.content.match(/\{[\s\S]*\}/);return JSON.parse(m[0])}
